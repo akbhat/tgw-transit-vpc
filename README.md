@@ -17,17 +17,17 @@ Review/override variables in main.tf
 
 **DO NOT CHANGE**
 ```
-*primary_region = 0*
-*cf_template = "lambda.template"*
+primary_region = 0
+cf_template = "lambda.template"
 ```
 **MAY CHANGE**
 ```
-*region = "us-east-1"*
-*ami_name_filter = "*srx*18.4R1.8--pm*"*
+region = "us-east-1"
+ami_name_filter = "*srx*18.4R1.8--pm*"
 ```
 **CHANGE - Provide path to public SSH key**
 ```
-*public_key_path = "./akbhat_transit_vsrx.pub"*
+public_key_path = "./akbhat_transit_vsrx.pub"
 ```
 
 Initialize Terraform providers: 
