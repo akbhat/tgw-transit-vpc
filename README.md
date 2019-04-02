@@ -1,7 +1,5 @@
 #### AWS Transit GW based TVPC Solution ####
 
-**Note: Currently this deployment will work only in us-east-1**
-
 #### Installing Terraform ####
 If Terraform 0.11.x is not already installed, use the following instructions:
 ```
