@@ -33,6 +33,11 @@ public_key_path = "./akbhat_transit_vsrx.pub"
 Initialize Terraform providers: 
 ```
 terraform init
+- Found version 1.58.0 of terraform-aws-modules/vpc/aws on registry.terraform.io
+- Found version 1.19.0 of terraform-aws-modules/ec2-instance/aws on registry.terraform.io
+- Downloading plugin for provider "aws" (2.4.0)...
+- Downloading plugin for provider "template" (2.1.0)...
+
 ```
 Run Terraform plan to ensure there are no errors: 
 ```
@@ -42,6 +47,8 @@ Deploy the template to AWS:
 ```
 terraform apply -auto-approve
 ```
+*NOTE: This module provisions two spoke VPCs alongwith EC2 instances, attaches them to the TGW for testing purposes*
+
 Destroy all the deployed resources: 
 ```
 terraform destroy
