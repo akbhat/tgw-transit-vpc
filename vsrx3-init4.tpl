@@ -4,12 +4,12 @@ groups {
         system {
             root-authentication {
                 encrypted-password "$1$ZUlES4dp$OUwWo1g7cLoV/aMWpHUnC/"; ## SECRET-DATA
-                ssh-rsa "ssh-rsa ${LambdaSshPublicKey}";
                 ssh-rsa "${SshPublicKey}"; ## SECRET-DATA
+                ssh-rsa "${LambdaSshPublicKey}";
             }
             services {
                 ssh {
-                    connection-limit 2;
+                    connection-limit 5;
                 }
             }
         }
@@ -100,6 +100,19 @@ interfaces {
             family inet {
                 address ${PrimaryPrivateEgressIpAddress}/24;
             }
+        }
+    }
+}
+policy-options {
+    policy-statement EXPORT-DEFAULT {
+        term default {
+            from {
+                route-filter 0.0.0.0/0 exact;
+            }
+            then accept;
+        }
+        term reject {
+            then reject;
         }
     }
 }

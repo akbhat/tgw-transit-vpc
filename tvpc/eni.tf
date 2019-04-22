@@ -70,6 +70,7 @@ resource "aws_route_table_association" "VSRX2EgressSubnet" {
 resource "aws_network_interface" "vSRXInterface11" {
   subnet_id       = "${aws_subnet.VPCPubSub11.id}"
   source_dest_check = false
+#  security_groups = ["${aws_cloudformation_stack.lambdas.outputs["VSRXSecurityGroup"]}"]
   security_groups = ["${aws_security_group.VSRXSecurityGroup.id}"]
 }
 
@@ -81,6 +82,12 @@ resource "aws_network_interface" "vSRXInterface12" {
 
 resource "aws_network_interface" "vSRXInterface13" {
   subnet_id       = "${aws_subnet.vsrx1_data_subnet2.id}"
+  source_dest_check = false
+  security_groups = ["${aws_security_group.VSRXSecurityGroup.id}"]
+}
+
+resource "aws_network_interface" "vSRXInterface14" {
+  subnet_id       = "${aws_subnet.vsrx1_data_subnet3.id}"
   source_dest_check = false
   security_groups = ["${aws_security_group.VSRXSecurityGroup.id}"]
 }
@@ -99,12 +106,6 @@ resource "aws_network_interface" "vSRXInterface22" {
 
 resource "aws_network_interface" "vSRXInterface23" {
   subnet_id       = "${aws_subnet.vsrx2_data_subnet2.id}"
-  source_dest_check = false
-  security_groups = ["${aws_security_group.VSRXSecurityGroup.id}"]
-}
-
-resource "aws_network_interface" "vSRXInterface14" {
-  subnet_id       = "${aws_subnet.vsrx1_data_subnet3.id}"
   source_dest_check = false
   security_groups = ["${aws_security_group.VSRXSecurityGroup.id}"]
 }

@@ -54,3 +54,19 @@ variable "s3_prefix_key_names" {
 variable "accountid" {
   default = ""
 }
+
+variable "spoke_vpc1_cidr" {
+  default = "10.150.0.0/16"
+}
+
+variable "spoke_vpc1_subnet" {
+  default = "10.150.2.0/24"
+}
+
+variable "spoke_vpc2_cidr" {
+  default = "10.160.0.0/16"
+}
+
+variable "spoke_vpc2_subnet" {
+  default = "10.160.2.0/24"
+}

@@ -24,6 +24,7 @@ resource "aws_eip" "vSRXEip22" {
   vpc = true
 }
 
+# vSRX1 management public IP address
 resource "aws_eip_association" "mgmt_eip_assoc_vsrx1" {
   network_interface_id = "${aws_network_interface.vSRXInterface11.id}"
   allocation_id        = "${aws_eip.vSRXEip12.id}"
@@ -31,6 +32,7 @@ resource "aws_eip_association" "mgmt_eip_assoc_vsrx1" {
   depends_on = ["aws_internet_gateway.igw"]
 }
 
+# vSRX2 management public IP address
 resource "aws_eip_association" "mgmt_eip_assoc_vsrx2" {
   network_interface_id = "${aws_network_interface.vSRXInterface21.id}"
   allocation_id        = "${aws_eip.vSRXEip22.id}"
@@ -40,10 +42,11 @@ resource "aws_eip_association" "mgmt_eip_assoc_vsrx2" {
 
 # These are assigned to the vSRX if load balancing is disabled
 # In case of LB, these IPs are assigned directly to the NLB
+# TODO: When NLB supports IPSec
 resource "aws_eip_association" "data_eip_assoc_vsrx1" {
 #  count                = "${1 - var.enable_load_balancing}"
   network_interface_id = "${aws_network_interface.vSRXInterface12.id}"
-  allocation_id        = "${aws_eip.vSRXEip12.id}"
+  allocation_id        = "${aws_eip.vsrx1_data_eip.id}"
 
   depends_on = ["aws_internet_gateway.igw"]
 }
@@ -51,9 +54,14 @@ resource "aws_eip_association" "data_eip_assoc_vsrx1" {
 resource "aws_eip_association" "data_eip_assoc_vsrx2" {
 #  count                = "${1 - var.enable_load_balancing}"
   network_interface_id = "${aws_network_interface.vSRXInterface22.id}"
-  allocation_id        = "${aws_eip.vSRXEip22.id}"
+  allocation_id        = "${aws_eip.vsrx2_data_eip.id}"
 
   depends_on = ["aws_internet_gateway.igw"]
+}
+
+resource "aws_key_pair" "vsrx_key" {
+  key_name   = "vsrx-key"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDW3fBHRMTQ3CUxWUnYD2XmjNjO8J6T038rYqjzUCNTYbWWCbH9sfdBu/GJpnh207hEB+PzRpKJnhsvPogb/wNNi0KzarWoUPKtqt0VQkpZg4fsIUcscyFiR3cb9pzKR4UOJzQo7ZTO0ulKqFeyrmDHM89bFMcC6ATz5lIvO5ZNukdtZ1+gnKqTLMoq8VcPYIllnOFNTiEpQyr+COmLMjNN7CVRqCmAo0vIw2mNZpA2hk/Nmstv7gxEGch2VNdJw6nOIaO9XXX+DcJagPoyJsjeuVb0yKi/DmEgPTZXhAsZ9Sgv8/pdj0vDf3O/G2LelohJ315q1p5h4pL2HGbVrnbf akbhat@ubuntu"
 }
 
 data "template_file" "vsrx3-conf1" {
@@ -65,9 +73,8 @@ data "template_file" "vsrx3-conf1" {
     PrimaryPrivateMgmtIpAddress = "${element(aws_network_interface.vSRXInterface12.private_ips,0)}"
     PrimaryPrivateIngressIpAddress = "${element(aws_network_interface.vSRXInterface13.private_ips,0)}"
     PrimaryPrivateEgressIpAddress  = "${element(aws_network_interface.vSRXInterface14.private_ips,0)}"
-#    LambdaSshPublicKey      = "${aws_cloudformation_stack.lambdas.outputs["VSRXPUBKEY"]}"
-#    LambdaSshPublicKey  = "${var.primary_region ? aws_cloudformation_stack.lambdas.outputs["VSRXPUBKEY"] : file(var.public_key_path)}"
-    LambdaSshPublicKey      = "${trimspace("${file(var.public_key_path)}")}"
+#    LambdaSshPublicKey  = "${var.primary_region ? format("%s %s", "ssh-rsa",aws_cloudformation_stack.lambdas.outputs["VSRXPUBKEY"]) : file(var.public_key_path)}"
+    LambdaSshPublicKey  = "${var.primary_region ? format("%s %s", "ssh-rsa",aws_cloudformation_stack.lambdas.outputs["VSRXPUBKEY"]) : "ssh-rsa SAFETODELETE"}"
   }
 }
 
@@ -80,8 +87,7 @@ data "template_file" "vsrx3-conf2" {
     PrimaryPrivateMgmtIpAddress = "${element(aws_network_interface.vSRXInterface22.private_ips,0)}"
     PrimaryPrivateIngressIpAddress = "${element(aws_network_interface.vSRXInterface23.private_ips,0)}"
     PrimaryPrivateEgressIpAddress  = "${element(aws_network_interface.vSRXInterface24.private_ips,0)}"
-#    LambdaSshPublicKey  = "${var.primary_region ? aws_cloudformation_stack.lambdas.outputs["VSRXPUBKEY"] : file(var.public_key_path)}"
-    LambdaSshPublicKey      = "${trimspace("${file(var.public_key_path)}")}"
+    LambdaSshPublicKey  = "${var.primary_region ? format("%s %s", "ssh-rsa",aws_cloudformation_stack.lambdas.outputs["VSRXPUBKEY"]) : trimspace(file(var.public_key_path))}"
   }
 }
 
@@ -90,6 +96,7 @@ resource "aws_instance" "VpcvSRX1" {
   ami           = "${data.aws_ami.vsrx3_ami.id}"
   ebs_optimized = true
   instance_type = "c4.xlarge"
+#  key_name      = "${aws_key_pair.vsrx_key.key_name}"
   disable_api_termination = false
 
   network_interface {
@@ -126,6 +133,8 @@ resource "aws_instance" "VpcvSRX2" {
   ami           = "${data.aws_ami.vsrx3_ami.id}"
   ebs_optimized = true
   instance_type = "c4.xlarge"
+#  key_name      = "${aws_key_pair.vsrx_key.key_name}"
+  disable_api_termination = false
 
   network_interface {
     network_interface_id = "${aws_network_interface.vSRXInterface21.id}"

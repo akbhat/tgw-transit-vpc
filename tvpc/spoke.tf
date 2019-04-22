@@ -80,11 +80,12 @@ module "spoke_vpc1" {
   create_vpc      = true
 
   name = "akbhat-spoke-vpc1"
-  cidr = "10.150.0.0/16"
-
+#  cidr = "10.150.0.0/16"
+  cidr = "${var.spoke_vpc1_cidr}"
   azs             = ["${data.aws_availability_zones.available.names[0]}"]
 #  private_subnets = ["10.150.1.0/24"]
-  public_subnets  = ["10.150.2.0/24"]
+#  public_subnets  = ["10.150.2.0/24"]
+  public_subnets  = ["${var.spoke_vpc1_subnet}"]
 
   enable_nat_gateway = true
 #  enable_vpn_gateway = true
@@ -101,11 +102,13 @@ module "spoke_vpc2" {
   create_vpc      = true
 
   name = "akbhat-spoke-vpc2"
-  cidr = "10.160.0.0/16"
+#  cidr = "10.160.0.0/16"
+  cidr = "${var.spoke_vpc2_cidr}"
 
   azs             = ["${data.aws_availability_zones.available.names[1]}"]
 #  private_subnets = ["10.160.1.0/24"]
-  public_subnets  = ["10.160.2.0/24"]
+#  public_subnets  = ["10.160.2.0/24"]
+  public_subnets  = ["${var.spoke_vpc2_subnet}"]
 
   enable_nat_gateway = true
 #  enable_vpn_gateway = true

@@ -1,5 +1,10 @@
 resource "aws_ec2_transit_gateway" "tvpc_tgw" {
   description = "TVPC TGW"
+  default_route_table_association = "disable"
+  default_route_table_propagation = "disable"
+#  tags = {
+#    transitvpc:spoke = "true"
+#  }
 }
 
 resource "aws_ec2_transit_gateway_route_table" "ingress" {

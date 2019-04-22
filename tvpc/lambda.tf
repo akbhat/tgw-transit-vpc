@@ -1,17 +1,12 @@
-resource "aws_cloudformation_stack" "lambdas" {
-  count        = "${var.primary_region}"
-  name         = "akbhat-transit-vpc-lambdas"
-  capabilities = ["CAPABILITY_IAM"]
-
+locals {
   parameters = {
     SshPublicKey          = "${file(var.public_key_path)}"
+    JuniperConfigSecurityGroup = "${aws_security_group.JuniperConfigSecurityGroup.id}"
     AllowedSshIpAddress   = "${var.allowed_ssh_ipadd}"
     TerminationProtection = "${var.enable_term_protection}"
     TransitVPC            = "${aws_vpc.tvpc.id}"
-#    PubSubnet11           = "${var.pub_mgmt_subnet_az1}"
     VPCPubSub11           = "${aws_subnet.VPCPubSub11.id}"
     vSRXInterface11PvtIP  = "${element(aws_network_interface.vSRXInterface11.private_ips,0)}"
-#    PubSubnet21           = "${var.pub_mgmt_subnet_az2}"
     VPCPubSub21           = "${aws_subnet.VPCPubSub21.id}"
     vSRXInterface21PvtIP  = "${element(aws_network_interface.vSRXInterface21.private_ips,0)}"
     PubSubnet12           = "${var.pub_data_subnet_az1}"
@@ -27,7 +22,26 @@ resource "aws_cloudformation_stack" "lambdas" {
     AccountId             = "${var.accountid}"
   }
 
-  template_body = "${file(var.cf_template)}"
+  params = {
+    bogus = "bogus"
+  }
+}
+
+locals {
+  keys =   ["${split(",", var.primary_region ? join(",", keys(local.parameters)) : join(",", keys(local.params)))}"]
+  values = ["${split(",", var.primary_region ? join(",", values(local.parameters)) : join(",", values(local.params)))}"]
+}
+
+resource "aws_cloudformation_stack" "lambdas" {
+  name         = "akbhat-transit-vpc-lambdas"
+  capabilities = ["CAPABILITY_IAM"]
+
+#  parameters = "${var.primary_region ? local.parameters : local.params}"
+  parameters = "${zipmap(local.keys,local.values)}"
+#  parameters = "${zipmap(coalescelist(local.keys),coalescelist(local.values))}"
+
+
+  template_body = "${var.primary_region ? file(var.cf_template) : file("bogus.template")}"
 
   timeouts {
     create = "5m"
