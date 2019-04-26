@@ -107,7 +107,8 @@ policy-options {
     policy-statement EXPORT-DEFAULT {
         term default {
             from {
-                route-filter 0.0.0.0/0 exact;
+                route-filter 10.150.0.0/16 exact;
+                route-filter 10.160.0.0/16 exact;
             }
             then accept;
         }
@@ -120,6 +121,13 @@ routing-instances {
     internet {
         instance-type virtual-router;
         interface ge-0/0/0.0;
+        routing-options {
+            static {
+                route 0.0.0.0/0 next-hop 10.10.30.1;
+                route 10.150.0.0/16 next-table intervpc.inet.0;
+                route 10.160.0.0/16 next-table intervpc.inet.0;
+            }
+        }
     }
     intervpc {
         instance-type virtual-router;
@@ -130,6 +138,13 @@ routing-instances {
                 route 10.150.0.0/16 next-hop 10.10.70.1;
                 route 10.160.0.0/16 next-hop 10.10.70.1;
             }
+        }
+    }
+}
+routing-options {
+    rib-groups {
+        internet2intervpc {
+            import-rib [ internet.inet.0 intervpc.inet.0 ];
         }
     }
 }

@@ -80,11 +80,9 @@ module "spoke_vpc1" {
   create_vpc      = true
 
   name = "akbhat-spoke-vpc1"
-#  cidr = "10.150.0.0/16"
   cidr = "${var.spoke_vpc1_cidr}"
   azs             = ["${data.aws_availability_zones.available.names[0]}"]
 #  private_subnets = ["10.150.1.0/24"]
-#  public_subnets  = ["10.150.2.0/24"]
   public_subnets  = ["${var.spoke_vpc1_subnet}"]
 
   enable_nat_gateway = true
@@ -102,12 +100,10 @@ module "spoke_vpc2" {
   create_vpc      = true
 
   name = "akbhat-spoke-vpc2"
-#  cidr = "10.160.0.0/16"
   cidr = "${var.spoke_vpc2_cidr}"
 
   azs             = ["${data.aws_availability_zones.available.names[1]}"]
 #  private_subnets = ["10.160.1.0/24"]
-#  public_subnets  = ["10.160.2.0/24"]
   public_subnets  = ["${var.spoke_vpc2_subnet}"]
 
   enable_nat_gateway = true
@@ -221,7 +217,7 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "spoke2_to_egress" {
 # Default routes pointing to TGW
 resource "aws_route" "spoke_route_vpc1" {
   route_table_id          = "${element(module.spoke_vpc1.public_route_table_ids,0)}" 
-  destination_cidr_block  = "10.160.0.0/16"
+  destination_cidr_block  = "${var.spoke_vpc2_cidr}"
   transit_gateway_id      = "${aws_ec2_transit_gateway.tvpc_tgw.id}"
 
   depends_on = ["aws_ec2_transit_gateway.tvpc_tgw"]
@@ -229,7 +225,7 @@ resource "aws_route" "spoke_route_vpc1" {
 
 resource "aws_route" "spoke_route_vpc2" {
   route_table_id          = "${element(module.spoke_vpc2.public_route_table_ids,0)}"
-  destination_cidr_block  = "10.150.0.0/16"
+  destination_cidr_block  = "${var.spoke_vpc1_cidr}" 
   transit_gateway_id      = "${aws_ec2_transit_gateway.tvpc_tgw.id}"
 
   depends_on = ["aws_ec2_transit_gateway.tvpc_tgw"]

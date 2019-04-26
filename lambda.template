@@ -169,7 +169,7 @@
     "Name" : "tgw-poller",
     "Description": "Transit VPC: Poller function responsible for identifying specifically tagged TGWs and creating VPN connections to Transit VPC.",
     "Runtime": "python2.7",
-    "Timeout": "120",
+    "Timeout": "600",
     "MemorySize": "128"
     },
     "FindReplace" : {
@@ -574,7 +574,8 @@
                     "ec2:CreateVpnConnection",
                     "ec2:DeleteVpnConnection",
 		    "ec2:DisassociateTransitGatewayRouteTable",
-		    "ec2:AssociateTransitGatewayRouteTable"
+		    "ec2:AssociateTransitGatewayRouteTable",
+                    "ec2:EnableTransitGatewayRouteTablePropagation"
           ],
           "Resource": "*"
         },
