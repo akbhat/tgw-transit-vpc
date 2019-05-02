@@ -56,6 +56,18 @@ security {
                 }
             }
         }
+        from-zone untrust to-zone trust {
+            policy default-permit {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
     }
     zones {
         security-zone trust {
